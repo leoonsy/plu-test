@@ -4,6 +4,7 @@ type Config = {
 };
 
 const BASE_URL = 'https://api.openweathermap.org';
+const LIMIT = 5;
 
 const request = async <T = unknown>({ url, params }: Config) => {
   const response = await fetch(`${BASE_URL}/${url}?${new URLSearchParams({
@@ -18,22 +19,37 @@ const request = async <T = unknown>({ url, params }: Config) => {
   throw new Error(response.statusText);
 };
 
+type Location = {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+  local_names: Record<string, string>;
+  state?: string;
+};
+
 export const readLocationsByTitle = async (title: string) => (
-  request<{
-    name: string;
-    lat: number;
-    lon: number;
-    country: string;
-    local_names: Record<string, string>;
-    state?: string;
-  }[]>({
+  request<Location[]>({
     url: 'geo/1.0/direct',
     params: {
       q: title,
-      limit: 3,
+      limit: LIMIT,
     },
   })
 );
+
+export const readLocationByCoords = async (lat: number, lon: number) => {
+  const response = await request<Location[]>({
+    url: 'geo/1.0/reverse',
+    params: {
+      lat,
+      lon,
+      limit: 1,
+    },
+  });
+
+  return response[0];
+};
 
 export const readWeather = async (lat: number, lon: number) => (
   request<{

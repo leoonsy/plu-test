@@ -75,7 +75,6 @@ const info = computed(() => ({
 .card {
   max-width: 17rem;
   padding: 0.8rem;
-  border: 1px solid #ebebeb;
 }
 
 .temp {

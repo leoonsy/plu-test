@@ -1,14 +1,24 @@
 <script setup lang="ts">
 import { useWeather } from '@/store/weather';
 import WeatherCard from '@/components/WeatherCard.vue';
+import { useGeoLocation } from '@/composables/useGeoLocation';
 
 const {
-  weatherList, fetchLocations, fetchWeatherList,
+  weatherList, fetchWeatherList, titlesList, fetchLocationByCoords,
 } = useWeather();
 
 (async () => {
-  await fetchLocations(['London', 'Moscow, RU']);
-  await fetchWeatherList();
+  if (titlesList.value.length) {
+    return;
+  }
+
+  try {
+    const { lat, lon } = await useGeoLocation();
+    await fetchLocationByCoords(lat, lon);
+    await fetchWeatherList();
+  } catch {
+    // handle error
+  }
 })();
 
 </script>

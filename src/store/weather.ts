@@ -1,4 +1,4 @@
-import { readLocationsByTitle, readWeather } from '@/api';
+import { readLocationByCoords, readLocationsByTitle, readWeather } from '@/api';
 import { computed, reactive } from 'vue';
 import omit from 'lodash-es/omit';
 
@@ -41,15 +41,33 @@ export type Weather = {
 
 const state = reactive({
   locations: {} as Record<string, Location[]>,
-  titles: [] as string[],
+  titlesList: [] as string[],
   weatherList: [] as Weather[],
 });
 
-const locations = computed(() => state.titles.map((title) => state.locations[title]).flat());
+const locationsList = computed(() => state.titlesList
+  .map((title) => state.locations[title])
+  .flat());
 const weatherList = computed(() => state.weatherList);
+const titlesList = computed(() => state.titlesList);
 
-const fetchLocations = async (titles: string[]) => {
+const extendLocation = (location: Awaited<ReturnType<typeof readLocationByCoords>>) => ({
+  ...omit(location, 'local_names'),
+  id: location.name + location.country + (location.state ?? ''),
+});
+
+const fetchLocationByCoords = async (lat: number, lon: number) => {
+  const location = await readLocationByCoords(lat, lon);
+  if (location) {
+    const title = location.name;
+    state.locations[title] = [extendLocation(location)];
+    state.titlesList.unshift(title);
+  }
+};
+
+const fetchLocationsByTitles = async (titles: string[]) => {
   const newTitles: string[] = [];
+  // обновленная хэш-таблица, чтобы не копились лишнее данные
   const newLocations: Record<string, Location[]> = {};
 
   titles.forEach((title) => {
@@ -61,21 +79,17 @@ const fetchLocations = async (titles: string[]) => {
   });
 
   await Promise.all(newTitles.map(async (title) => {
-    const response = await readLocationsByTitle(title);
-    newLocations[title] = response.map((location) => ({
-      // не поддерживаем мультиязычность
-      ...omit(location, 'local_names'),
-      id: location.name + location.country + (location.state ?? ''),
-    }));
+    const locations = await readLocationsByTitle(title);
+    newLocations[title] = locations.map((location) => extendLocation(location));
   }));
 
   state.locations = newLocations;
-  state.titles = titles;
+  state.titlesList = titles;
 };
 
 const fetchWeatherList = async () => {
   state.weatherList = await Promise.all(
-    locations.value.map(async (location) => {
+    locationsList.value.map(async (location) => {
       const data = await readWeather(location.lat, location.lon);
       return {
         ...data,
@@ -88,8 +102,10 @@ const fetchWeatherList = async () => {
 };
 
 export const useWeather = () => ({
-  locations,
-  fetchLocations,
+  locations: locationsList,
+  fetchLocations: fetchLocationsByTitles,
+  fetchLocationByCoords,
   weatherList,
   fetchWeatherList,
+  titlesList,
 });
