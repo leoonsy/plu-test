@@ -1,4 +1,3 @@
-import '@/assets/style.css';
 import { createApp, h } from 'vue';
 import wrapper from 'vue3-webcomponent-wrapper';
 import App from '@/App.vue';

@@ -1,8 +1,9 @@
-import { readLocationByTitle, readWeather } from '@/api';
+import { readLocationsByTitle, readWeather } from '@/api';
 import { computed, reactive } from 'vue';
 import omit from 'lodash-es/omit';
 
 export type Location = {
+  id: string;
   name: string;
   lat: number;
   lon: number;
@@ -11,6 +12,9 @@ export type Location = {
 };
 
 export type Weather = {
+  id: string;
+  name: string;
+  country: string;
   weather: {
     id: number;
     main: string;
@@ -33,14 +37,11 @@ export type Weather = {
     deg: number;
     gust: number;
   };
-  id: number;
-  name: string;
-  country: string;
 };
 
 const state = reactive({
   locations: {} as Record<string, Location[]>,
-  titles: ['London', 'Moscow, RU'] as string[],
+  titles: [] as string[],
   weatherList: [] as Weather[],
 });
 
@@ -60,9 +61,12 @@ const fetchLocations = async (titles: string[]) => {
   });
 
   await Promise.all(newTitles.map(async (title) => {
-    const location = await readLocationByTitle(title);
-    // не поддерживаем мультиязычность
-    newLocations[title] = omit(location, 'local_names');
+    const response = await readLocationsByTitle(title);
+    newLocations[title] = response.map((location) => ({
+      // не поддерживаем мультиязычность
+      ...omit(location, 'local_names'),
+      id: location.name + location.country + (location.state ?? ''),
+    }));
   }));
 
   state.locations = newLocations;
@@ -77,6 +81,7 @@ const fetchWeatherList = async () => {
         ...data,
         name: location.name,
         country: location.country,
+        id: location.id,
       };
     }),
   );

@@ -10,7 +10,9 @@
   },  
   "include": [  
     "src/**/*.ts",
-    "src/**/*.vue"
+    "src/**/*.vue",
+    "webpack.config.js",
+    "postcss.config.js"
   ],  
   "exclude": [  
     "node_modules",

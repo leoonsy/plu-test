@@ -1,11 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { VueLoaderPlugin } = require('vue-loader')
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { VueLoaderPlugin } = require('vue-loader');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 
-const src  = path.resolve(__dirname, 'src');
+const src = path.resolve(__dirname, 'src');
 const dist = path.resolve(__dirname, 'dist');
 
 module.exports = (env, argv) => {
@@ -22,25 +22,28 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /\.css$/i,
-          use: ['style-loader', 
-          {
-            loader: 'css-loader',
-            options: {
-              // включаем CSS модули
-              modules: {
-                localIdentName: '[local]_[hash:base64:8]',
+          test: /\.(scss|css)$/,
+          use: [
+            'style-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                modules: {
+                  localIdentName: '[local]_[hash:base64:8]',
+                },
               },
-            }
-          }, 'postcss-loader'],
-        },      
+            },
+            'postcss-loader',
+            'sass-loader',
+          ],
+        },
         {
           test: /\.(png|svg|jpg|jpeg|gif)$/i,
-          type: 'asset/resource',
+          type: 'asset/inline',
         },
         {
           test: /\.(woff|woff2|eot|ttf|otf)$/i,
-          type: 'asset/resource',
+          type: 'asset/inline',
         },
         {
           test: /\.tsx?$/,
@@ -49,16 +52,16 @@ module.exports = (env, argv) => {
             options: {
               presets: [
                 [
-                  '@babel/preset-env', 
-                  { 
-                    useBuiltIns: "usage",
-                    corejs: "3.6.5" 
-                  }
+                  '@babel/preset-env',
+                  {
+                    useBuiltIns: 'usage',
+                    corejs: '3.6.5',
+                  },
                 ],
-                "babel-preset-typescript-vue3",
-                "@babel/preset-typescript",
-              ]
-            }
+                'babel-preset-typescript-vue3',
+                '@babel/preset-typescript',
+              ],
+            },
           },
           exclude: /node_modules/,
         },
@@ -68,7 +71,7 @@ module.exports = (env, argv) => {
           options: {
             hotReload: false,
           },
-        }
+        },
       ],
     },
     devtool: isDev ? 'source-map' : false,
@@ -91,7 +94,7 @@ module.exports = (env, argv) => {
     //   },
     // },
     mode: argv.mode,
-    resolve: { 
+    resolve: {
       extensions: ['.ts', '...'],
       alias: {
         '@': src,
@@ -106,5 +109,5 @@ module.exports = (env, argv) => {
     devServer: {
       static: dist,
     },
-  }
-}
+  };
+};

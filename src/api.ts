@@ -18,7 +18,7 @@ const request = async <T = unknown>({ url, params }: Config) => {
   throw new Error(response.statusText);
 };
 
-export const readLocationByTitle = async (title: string) => (
+export const readLocationsByTitle = async (title: string) => (
   request<{
     name: string;
     lat: number;
@@ -30,7 +30,7 @@ export const readLocationByTitle = async (title: string) => (
     url: 'geo/1.0/direct',
     params: {
       q: title,
-      limit: 1,
+      limit: 3,
     },
   })
 );
@@ -73,6 +73,7 @@ export const readWeather = async (lat: number, lon: number) => (
     params: {
       lat,
       lon,
+      units: 'metric',
     },
   })
 );
