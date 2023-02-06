@@ -100,9 +100,9 @@ module.exports = (env, argv) => {
         '@': src,
       },
     },
-    optimization: {
-      minimize: false,
-    },
+    // optimization: {
+    //   minimize: false,
+    // },
     externals: {
       vue: 'Vue',
     },

@@ -57,6 +57,7 @@
     "@vue/eslint-config-airbnb-with-typescript": "^7.0.0",
     "lodash-es": "^4.17.21",
     "vue": "^3.2.36",
-    "vue3-webcomponent-wrapper": "^0.2.0"
+    "vue3-webcomponent-wrapper": "^0.2.0",
+    "vuedraggable-es": "^4.1.1"
   }
 }

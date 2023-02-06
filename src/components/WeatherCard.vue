@@ -3,6 +3,7 @@ import type { Weather } from '@/store/weather';
 import { computed } from 'vue';
 import Description from './Description.vue';
 import Descriptions from './Descriptions.vue';
+import BaseCard from './BaseCard.vue';
 
 const props = defineProps<{
   weather: Weather;
@@ -31,10 +32,10 @@ const info = computed(() => ({
 </script>
 
 <template>
-  <div :class="$style.card">
-    <span :class="$style.header">
+  <BaseCard>
+    <template #title>
       {{ info.name }}, {{ info.country }}
-    </span>
+    </template>
 
     <div :class="$style.temp">
       <img
@@ -64,7 +65,7 @@ const info = computed(() => ({
         {{ info.visibility }}km
       </Description>
     </Descriptions>
-  </div>
+  </BaseCard>
 </template>
 
 <style module lang="scss">
@@ -73,8 +74,8 @@ const info = computed(() => ({
 }
 
 .card {
-  max-width: 17rem;
   padding: 0.8rem;
+  box-shadow: rgb(99 99 99 / 20%) 0 0.125rem 0.5rem 0;
 }
 
 .temp {
