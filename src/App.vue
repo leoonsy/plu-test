@@ -4,15 +4,17 @@ import WeatherCard from '@/components/WeatherCard.vue';
 import SettingsCard from '@/components/SettingsCard.vue';
 import ImageButton from '@/components/ImageButton.vue';
 import { useGeoLocation } from '@/composables/useGeoLocation';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const {
-  weatherList, fetchWeatherList, titlesList, fetchLocationByCoords,
+  weatherList, fetchWeatherList, titlesList, fetchLocationByCoords, fetchLocations,
 } = useWeather();
 
 const isSettings = ref(false);
+// причины не использовать события или store см. в компоненте SettingsCard
+const settingsElement = ref(null as unknown as InstanceType<typeof SettingsCard>);
 
-const setupUserLocation = async () => {
+const fetchUserLocation = async () => {
   if (titlesList.value.length) {
     return;
   }
@@ -25,17 +27,29 @@ const setupUserLocation = async () => {
     // handle error
   }
 };
-setupUserLocation();
+fetchUserLocation();
+
+const fetchLocationsAndWeather = async (titles: string[]) => {
+  await fetchLocations(titles);
+  await fetchWeatherList();
+};
 
 const toggleSettings = () => {
   isSettings.value = !isSettings.value;
 };
+
+watch(isSettings, () => {
+  if (!isSettings.value) {
+    fetchLocationsAndWeather(settingsElement.value.titles);
+  }
+});
 </script>
 
 <template>
   <div :class="$style.root">
     <SettingsCard
       v-if="isSettings"
+      ref="settingsElement"
       :titles="titlesList"
     />
 
@@ -44,12 +58,12 @@ const toggleSettings = () => {
         v-if="!weatherList.length"
         :class="$style.access"
       >
-        Here will be weather widgets. Give access to the location or customize the list yourself.
+        This is weather widgets. Give access to the location or customize the list yourself.
       </div>
 
       <WeatherCard
         v-for="weather of weatherList"
-        :key="weather.id"
+        :key="weather.location.id"
         :weather="weather"
         :class="$style.card"
       />
@@ -61,7 +75,7 @@ const toggleSettings = () => {
       @click="toggleSettings"
     >
       <img
-        :src="isSettings ? require('@/assets/cross.svg') : require('@/assets/settings.svg')"
+        :src="isSettings ? require(`@/assets/cross.svg`) : require('@/assets/settings.svg')"
         alt="settings"
       />
     </ImageButton>

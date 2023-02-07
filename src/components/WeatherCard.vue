@@ -28,13 +28,18 @@ const info = computed(() => ({
     direction: getWindDirection(props.weather.wind.deg),
   },
   visibility: (props.weather.visibility / 1000).toFixed(1),
+  location: props.weather.location,
 }));
 </script>
 
 <template>
   <BaseCard>
     <template #title>
-      {{ info.name }}, {{ info.country }}
+      {{ info.location.name }},
+      {{ info.location.country }}
+      <div v-if="info.location.state">
+        {{ info.location.state }}
+      </div>
     </template>
 
     <div :class="$style.temp">

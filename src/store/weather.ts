@@ -12,9 +12,7 @@ export type Location = {
 };
 
 export type Weather = {
-  id: string;
-  name: string;
-  country: string;
+  location: Location; // избыточность по памяти в угоду отсутствия поиска по возможному locationId
   weather: {
     id: number;
     main: string;
@@ -66,6 +64,7 @@ const fetchLocationByCoords = async (lat: number, lon: number) => {
 };
 
 const fetchLocationsByTitles = async (titles: string[]) => {
+  // чтобы при обновлении не запрашивались снова координаты
   const newTitles: string[] = [];
   // обновленная хэш-таблица, чтобы не копились лишнее данные
   const newLocations: Record<string, Location[]> = {};
@@ -93,9 +92,7 @@ const fetchWeatherList = async () => {
       const data = await readWeather(location.lat, location.lon);
       return {
         ...data,
-        name: location.name,
-        country: location.country,
-        id: location.id,
+        location,
       };
     }),
   );

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // для уменьшения сборки можно было реализовать drag-drop на html 5, но браузеры не оч поддерживают
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import draggable from 'vuedraggable-es';
 import BaseCard from './BaseCard.vue';
 import ImageButton from './ImageButton.vue';
@@ -9,10 +9,31 @@ const props = defineProps<{
   titles: string[];
 }>();
 
+// draggable требует использования объекта для item-key
 const titles = ref(props.titles.map((title) => ({ title })));
-titles.value.push({ title: 'Samara' });
+const plainTitles = computed(() => titles.value.map((data) => data.title));
 
 const drag = ref(false);
+
+const newTitle = ref('');
+
+const add = () => {
+  if (!titles.value.find((data) => data.title === newTitle.value)) {
+    titles.value.push({ title: newTitle.value });
+  }
+};
+
+const remove = (title: string) => {
+  titles.value = titles.value.filter((data) => data.title !== title);
+};
+
+/*
+можно было бы генерировать событие с данными, но сохранение происходит по нажатию
+на крестик, компонент которого лежит не тут. А располагать его тут тоже неверно -
+вдруг нужно будет вынести его за пределы карточки. Либо можно было напрямую сразу менять
+titles в store, но тогда компонент не будет чистым, что не круто.
+*/
+defineExpose({ titles: plainTitles });
 </script>
 
 <template>
@@ -36,7 +57,7 @@ const drag = ref(false);
       @start="drag = true"
       @end="drag = false"
     >
-      <template #item="{ element }">
+      <template #item="{ element: { title } }">
         <li :class="$style.item">
           <ImageButton
             :class="$style.burger"
@@ -45,10 +66,11 @@ const drag = ref(false);
             <img src="@/assets/burger.svg" alt="burger" />
           </ImageButton>
 
-          <span v-text="element.title" />
+          <span v-text="title" />
           <ImageButton
             :class="$style.remove"
             type="button"
+            @click="remove(title)"
           >
             <img src="@/assets/remove.svg" alt="remove" />
           </ImageButton>
@@ -62,17 +84,24 @@ const drag = ref(false);
       v-text="'Add location:'"
     />
 
-    <div :class="$style.add">
+    <form
+      :class="$style.add"
+      @submit.prevent="add"
+    >
       <input
         id="location-input"
+        v-model="newTitle"
         type="text"
         :class="$style.input"
       />
 
-      <ImageButton :class="$style.submit">
+      <ImageButton
+        :class="$style.submit"
+        type="submit"
+      >
         <img src="@/assets/enter.svg" alt="add location" />
       </ImageButton>
-    </div>
+    </form>
   </BaseCard>
 </template>
 
