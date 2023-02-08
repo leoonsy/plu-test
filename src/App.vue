@@ -16,6 +16,7 @@ const settingsElement = ref(null as unknown as InstanceType<typeof SettingsCard>
 
 const fetchUserLocation = async () => {
   if (titlesList.value.length) {
+    await fetchWeatherList();
     return;
   }
 

@@ -1,6 +1,7 @@
 import { readLocationByCoords, readLocationsByTitle, readWeather } from '@/api';
 import { computed, reactive } from 'vue';
 import omit from 'lodash-es/omit';
+import storage from '@/storage';
 
 export type Location = {
   id: string;
@@ -37,9 +38,12 @@ export type Weather = {
   };
 };
 
+const LOCATIONS_KEY = 'locations';
+const TITLES_KEY = 'titles';
+
 const state = reactive({
-  locations: {} as Record<string, Location[]>,
-  titlesList: [] as string[],
+  locations: JSON.parse(storage.get(LOCATIONS_KEY) ?? '{}') as Record<string, Location[]>,
+  titlesList: JSON.parse(storage.get(TITLES_KEY) ?? '[]') as string[],
   weatherList: [] as Weather[],
 });
 
@@ -54,12 +58,18 @@ const extendLocation = (location: Awaited<ReturnType<typeof readLocationByCoords
   id: location.name + location.country + (location.state ?? ''),
 });
 
+const saveToStorage = () => {
+  storage.set(LOCATIONS_KEY, JSON.stringify(state.locations));
+  storage.set(TITLES_KEY, JSON.stringify(state.titlesList));
+};
+
 const fetchLocationByCoords = async (lat: number, lon: number) => {
   const location = await readLocationByCoords(lat, lon);
   if (location) {
     const title = location.name;
     state.locations[title] = [extendLocation(location)];
     state.titlesList.unshift(title);
+    saveToStorage();
   }
 };
 
@@ -84,6 +94,7 @@ const fetchLocationsByTitles = async (titles: string[]) => {
 
   state.locations = newLocations;
   state.titlesList = titles;
+  saveToStorage();
 };
 
 const fetchWeatherList = async () => {

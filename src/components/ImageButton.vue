@@ -24,7 +24,7 @@ withDefaults(defineProps<{
   background-color: transparent;
   border: none;
 
-  & img {
+  img {
     width: 100%;
   }
 }

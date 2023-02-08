@@ -24,7 +24,7 @@ defineProps<{
   </div>
 </template>
 
-<style module lang="scss">
+<style module>
 .icon {
   width: 1rem;
   margin-right: 0.2rem;

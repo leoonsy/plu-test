@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<style module lang="scss">
+<style module>
 .descriptions {
   display: flex;
   flex-wrap: wrap;

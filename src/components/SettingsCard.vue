@@ -20,11 +20,16 @@ const newTitle = ref('');
 const add = () => {
   if (!titles.value.find((data) => data.title === newTitle.value)) {
     titles.value.push({ title: newTitle.value });
+    newTitle.value = '';
   }
 };
 
 const remove = (title: string) => {
   titles.value = titles.value.filter((data) => data.title !== title);
+};
+
+const setDrag = (value: boolean) => {
+  drag.value = value;
 };
 
 /*
@@ -54,8 +59,8 @@ defineExpose({ titles: plainTitles });
       :animation="200"
       :handle="`.${$style.burger}`"
       :ghost-class="$style.ghost"
-      @start="drag = true"
-      @end="drag = false"
+      @start="setDrag(true)"
+      @end="setDrag(false)"
     >
       <template #item="{ element: { title } }">
         <li :class="$style.item">
@@ -67,6 +72,7 @@ defineExpose({ titles: plainTitles });
           </ImageButton>
 
           <span v-text="title" />
+
           <ImageButton
             :class="$style.remove"
             type="button"
@@ -90,7 +96,7 @@ defineExpose({ titles: plainTitles });
     >
       <input
         id="location-input"
-        v-model="newTitle"
+        v-model.trim="newTitle"
         type="text"
         :class="$style.input"
       />
